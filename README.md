@@ -171,7 +171,6 @@ pip install -r requirements.txt
 python app.py
 ```
 
-The app will be available at **http://localhost:8000** — the SQLite database is created and seeded automatically on first run.
 
 ---
 
