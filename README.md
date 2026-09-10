@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-# CampusPulse
-
-A real-time campus announcement and notification dashboard for students — sign-in, personalized feeds, acknowledgements, bookmarks, morning digests, and calendar (.ics) export.
-
-## Project structure
-=======
 <p align="center">
   <img src="https://i.ibb.co.com/7NrtB6Vv/image.png" alt="CampusPulse banner" width="100%" />
 </p>
@@ -15,7 +8,6 @@ A real-time campus announcement and notification dashboard for students — sign
 <p align="center">
   Built for <b>ForkedArch Freshers Hackathon 2026</b> by <b>Team CODE_and_CAFFEINE</b>
 </p>
->>>>>>> 9131afa (Final change for readme file)
 
 <p align="center">
   <a href="https://instant-launch-link--marufrahmancode.replit.app/"><b>🔗 Live Demo</b></a>
