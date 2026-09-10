@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Database (auto-created on first run — don't commit local dev data)
+campuspulse.sqlite
+campuspulse.sqlite-wal
+campuspulse.sqlite-shm
+
+# OS / editor
+.DS_Store
+.vscode/
