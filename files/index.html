@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusPulse — Intelligent Campus Signal & Announcement Hub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
+</head>
+<body>
+
+  <!-- ============================================================= -->
+  <!-- Auth Gate: Sign Up / Log In (shown when no active session)     -->
+  <!-- ============================================================= -->
+  <div id="auth-gate" class="auth-gate">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="pulse-icon">⚡</div>
+        <div>
+          <h1 class="brand-title">CampusPulse</h1>
+          <div class="brand-subtitle">One Campus, Zero Noise • Code & Caffeine</div>
+        </div>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" data-auth-tab="login">Log In</button>
+        <button class="auth-tab-btn" data-auth-tab="signup">Sign Up</button>
+      </div>
+
+      <div id="auth-error" class="auth-error" style="display:none;"></div>
+
+      <!-- Login Form -->
+      <form id="login-form" class="auth-form active">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="login-email" class="form-input" placeholder="you@kuet.ac.bd" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Log In</button>
+      </form>
+
+      <!-- Sign Up Form -->
+      <form id="signup-form" class="auth-form">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="signup-name" class="form-input" placeholder="e.g. Arafat Rahman" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="signup-email" class="form-input" placeholder="you@kuet.ac.bd" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="signup-password" class="form-input" placeholder="At least 6 characters" required minlength="6">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Role</label>
+            <select id="signup-role" class="form-select">
+              <option value="student" selected>Student</option>
+              <option value="cr">Class Representative</option>
+              <option value="faculty">Faculty</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <select id="signup-department" class="form-select">
+              <option value="CSE" selected>CSE</option>
+              <option value="EEE">EEE</option>
+              <option value="ME">ME</option>
+              <option value="CE">CE</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Batch</label>
+            <select id="signup-batch" class="form-select">
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23" selected>23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Section</label>
+            <select id="signup-section" class="form-select">
+              <option value="A" selected>A</option>
+              <option value="B">B</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hall</label>
+          <input type="text" id="signup-hall" class="form-input" placeholder="e.g. Lalon Shah Hall">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Clubs (comma separated, optional)</label>
+          <input type="text" id="signup-clubs" class="form-input" placeholder="e.g. KUET Robotics Club, Debating Society">
+        </div>
+
+        <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.75rem; margin-bottom: 1rem;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem;">
+            🔔 Get Instant Pop-Up Alerts For
+          </div>
+          <div class="topic-checkbox-grid" id="signup-topics">
+            <label class="topic-checkbox"><input type="checkbox" value="academics" checked> 🎓 Academics</label>
+            <label class="topic-checkbox"><input type="checkbox" value="clubs" checked> 🤖 Clubs & Hackathons</label>
+            <label class="topic-checkbox"><input type="checkbox" value="admin"> 🏛️ Administration</label>
+            <label class="topic-checkbox"><input type="checkbox" value="hall"> 🏢 Hall & Residential</label>
+            <label class="topic-checkbox"><input type="checkbox" value="community"> 🤝 Community</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Create Account</button>
+      </form>
+
+      <div class="auth-divider"><span>or try instantly</span></div>
+
+      <div id="auth-demo-list" class="auth-demo-list">
+        <!-- Populated by app.js with demo personas -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- Pop-up Notification Container (preference-matched alerts)      -->
+  <!-- ============================================================= -->
+  <div id="popup-notification-container" class="popup-notification-container"></div>
+
+  <!-- ============================================================= -->
+  <!-- Main App Shell (hidden until logged in)                        -->
+  <!-- ============================================================= -->
+  <div id="app-shell" style="display:none;">
+
+  <!-- Top Navigation Bar -->
+  <header>
+    <div class="nav-container">
+      <div class="logo-group">
+        <div class="pulse-icon">⚡</div>
+        <div>
+          <h1 class="brand-title">CampusPulse</h1>
+          <div class="brand-subtitle">One Campus, Zero Noise • Code & Caffeine</div>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Morning Briefing Button -->
+        <button id="open-briefing-btn" class="btn btn-secondary btn-sm" title="View Today's Morning Digest">
+          🌅 Morning Briefing
+        </button>
+
+        <!-- Publish Notice Button -->
+        <button id="open-publish-modal-btn" class="btn btn-primary btn-sm">
+          ➕ Post Notice
+        </button>
+
+        <!-- Notification Preferences (pop-up topic settings) -->
+        <button id="open-notif-prefs-btn" class="btn btn-secondary btn-sm" style="padding: 0.4rem 0.6rem;" title="Pop-up Notification Preferences">
+          🔔
+        </button>
+
+        <!-- Current Persona Header Pill -->
+        <div id="active-persona-pill" class="persona-selector" title="Account">
+          <img id="header-avatar" class="persona-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Arafat" alt="Avatar">
+          <span id="header-name" class="persona-name">Arafat</span>
+          <span id="header-tag" class="persona-tag">CSE 21-A</span>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button id="theme-toggle-btn" class="btn btn-secondary btn-sm" style="padding: 0.4rem 0.6rem;" title="Toggle Light/Dark Theme">
+          🌓
+        </button>
+
+        <!-- Logout -->
+        <button id="logout-btn" class="btn btn-secondary btn-sm" style="padding: 0.4rem 0.6rem;" title="Log Out">
+          🚪
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <main class="main-container">
+    
+    <!-- Left Column: Feeds & Alerts -->
+    <section class="feed-section">
+      
+      <!-- Emergency Flash Alert Banner (Dynamic) -->
+      <div id="emergency-banner-container"></div>
+
+      <!-- Feed Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-top">
+          <!-- Feed Mode Tabs -->
+          <div class="feed-tabs">
+            <button class="tab-btn active" data-feed="for_me">🎯 For Me</button>
+            <button class="tab-btn" data-feed="all">🌐 Campus Explore</button>
+            <button class="tab-btn" data-feed="deadlines">⏳ Deadlines</button>
+            <button class="tab-btn" data-feed="official">🏛️ Official</button>
+            <button class="tab-btn" data-feed="bookmarks">⭐ Saved</button>
+          </div>
+
+          <!-- Instant Search -->
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" class="search-input" placeholder="Search notices, courses, rooms, tags...">
+          </div>
+        </div>
+
+        <!-- Category Tag Pills -->
+        <div class="category-filter-list">
+          <button class="category-tag active" data-category="all">All Categories</button>
+          <button class="category-tag" data-category="academics">🎓 Academics</button>
+          <button class="category-tag" data-category="clubs">🤖 Clubs & Hackathons</button>
+          <button class="category-tag" data-category="admin">🏛️ Administration</button>
+          <button class="category-tag" data-category="hall">🏢 Hall & Residential</button>
+          <button class="category-tag" data-category="community">🤝 Community & Lost/Found</button>
+        </div>
+
+        <!-- Noise Reduction & Urgency Slider -->
+        <div class="noise-filter-bar">
+          <div class="noise-metric">
+            <span>Noise Filter:</span>
+            <span id="noise-reduced-badge" class="noise-badge">38% Noise Blocked</span>
+            <span id="feed-count-label" style="font-size: 0.75rem; color: var(--text-muted);">Showing 5 relevant notices</span>
+          </div>
+
+          <div class="urgency-filter-group">
+            <span class="urgency-label">Filter Level:</span>
+            <button class="urgency-pill" data-urgency="strict" title="Only critical & imminent updates">⚡ Strict (Urgent)</button>
+            <button class="urgency-pill active" data-urgency="balanced" title="Balanced academic & club updates">⚖️ Balanced</button>
+            <button class="urgency-pill" data-urgency="all" title="Show every campus update">📢 All (Unfiltered)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feed Stream -->
+      <div id="feed-stream" class="feed-stream">
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <p>Loading your personalized campus feed...</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right Column: Sidebar & Intelligence Widgets -->
+    <aside class="sidebar">
+
+      <!-- Morning Briefing Widget Card -->
+      <div class="briefing-banner-widget">
+        <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">☕</div>
+        <h3>Morning Briefing</h3>
+        <p>No need to scroll 20 chat groups. Get a 30-second executive summary of today's classes and deadlines.</p>
+        <button id="sidebar-briefing-btn" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center;">
+          Generate Morning Digest
+        </button>
+      </div>
+
+      <!-- Quick Persona Switcher -->
+      <div class="widget-card">
+        <div class="widget-title">
+          <span>Test Personas</span>
+          <span style="font-size: 0.7rem; color: var(--primary); font-weight: 600;">1-Click Switch</span>
+        </div>
+        <div id="persona-list" class="persona-list">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+      <!-- Deadline Radar Widget -->
+      <div class="widget-card">
+        <div class="widget-title">
+          <span>⏳ Deadline Radar</span>
+          <span id="sidebar-deadline-count" style="font-size: 0.75rem; color: var(--high);">3 Active</span>
+        </div>
+        <div id="deadline-radar-list" class="deadline-list">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+      <!-- Architecture & Value Proposition Card -->
+      <div class="widget-card" style="font-size: 0.8rem; color: var(--text-secondary);">
+        <div class="widget-title" style="margin-bottom: 0.5rem;">
+          <span>💡 How CampusPulse Solves It</span>
+        </div>
+        <ul style="padding-left: 1.1rem; line-height: 1.6;">
+          <li><strong>Zero Buried Alerts:</strong> Flash banner with audio chime for emergency room shifts.</li>
+          <li><strong>Audience Targeting:</strong> Filtered by Dept, Batch & Section — no 4th year spam for 1st years.</li>
+          <li><strong>Proof of Reach:</strong> CRs & Faculty track real-time acknowledgment counters.</li>
+          <li><strong>Deadline Radar:</strong> 1-click export to Google/Apple Calendar (.ics).</li>
+        </ul>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- Modal: Post Notice -->
+  <div id="publish-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📢 Broadcast Announcement</h3>
+        <button id="close-publish-modal" class="close-btn">&times;</button>
+      </div>
+      <form id="publish-form">
+        
+        <div class="form-group">
+          <label class="form-label">Urgency Level *</label>
+          <select id="pub-urgency" class="form-select" required>
+            <option value="critical">🚨 Critical / Immediate Flash (Audio Chime + Sticky Banner)</option>
+            <option value="high">⚠️ High Priority / Approaching Deadline</option>
+            <option value="medium" selected>ℹ️ Medium / Standard Academic Notice</option>
+            <option value="low">🌱 Low / Community & Casual</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Announcement Title *</label>
+          <input type="text" id="pub-title" class="form-input" placeholder="e.g. CSE-3101 Database Systems relocated to NAB-405" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select id="pub-category" class="form-select" required>
+              <option value="academics">🎓 Academics</option>
+              <option value="clubs">🤖 Clubs & Competitions</option>
+              <option value="admin">🏛️ Administration</option>
+              <option value="hall">🏢 Hall & Residential</option>
+              <option value="community">🤝 Campus Community</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Room / Location Shift (Optional)</label>
+            <input type="text" id="pub-location" class="form-input" placeholder="e.g. Room 302 ➔ NAB-405">
+          </div>
+        </div>
+
+        <!-- Target Audience Filtering -->
+        <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.75rem; margin-bottom: 1rem;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem;">
+            🎯 Target Audience Scope (Eliminates Irrelevant Spam)
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+              <label class="form-label">Department</label>
+              <select id="pub-target-dept" class="form-select">
+                <option value="ALL">Entire Campus (ALL)</option>
+                <option value="CSE" selected>CSE</option>
+                <option value="EEE">EEE</option>
+                <option value="ME">ME</option>
+                <option value="CE">CE</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+              <label class="form-label">Batch</label>
+              <select id="pub-target-batch" class="form-select">
+                <option value="ALL">All Batches</option>
+                <option value="21" selected>Batch 21</option>
+                <option value="22">Batch 22</option>
+                <option value="23">Batch 23</option>
+                <option value="24">Batch 24</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Section</label>
+              <select id="pub-target-section" class="form-select">
+                <option value="ALL">All Sections (A & B)</option>
+                <option value="A" selected>Section A</option>
+                <option value="B">Section B</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Club / Hall (Optional)</label>
+              <select id="pub-target-club" class="form-select">
+                <option value="ALL">None / Campus-wide</option>
+                <option value="Cyber Security Club">Cyber Security Club</option>
+                <option value="KUET Robotics Club">KUET Robotics Club</option>
+                <option value="KUET Programming Club">KUET Programming Club</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Detailed Content *</label>
+          <textarea id="pub-content" class="form-textarea" rows="3" placeholder="Provide full context, rationale, and instructions..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">AI-Style TL;DR Bullet (Quick takeaway for busy students)</label>
+          <input type="text" id="pub-tldr" class="form-input" placeholder="e.g. Class shifted to NAB-405 at 10 AM. Arrive on time.">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Deadline (Optional)</label>
+            <input type="datetime-local" id="pub-deadline" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Action Button Label (Optional)</label>
+            <input type="text" id="pub-action-label" class="form-input" placeholder="e.g. Register Team / Open LMS">
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+          <input type="checkbox" id="pub-requires-ack" checked>
+          <label for="pub-requires-ack" style="font-size: 0.85rem; cursor: pointer;">
+            Require Student Acknowledgment Receipt ("Got It" / Read confirmation)
+          </label>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
+          <button type="button" id="cancel-publish-btn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Publish & Broadcast 🚀</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Morning Briefing Digest -->
+  <div id="briefing-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.5rem;">🌅</span>
+          <h3 id="briefing-modal-title">Morning Briefing</h3>
+        </div>
+        <button id="close-briefing-modal" class="close-btn">&times;</button>
+      </div>
+      
+      <div id="briefing-modal-body">
+        <!-- Filled dynamically -->
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button id="dismiss-briefing-btn" class="btn btn-primary btn-sm">Done & Clear for Today</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Notification Preferences -->
+  <div id="notif-prefs-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>🔔 Pop-Up Notification Preferences</h3>
+        <button id="close-notif-prefs-modal" class="close-btn">&times;</button>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+        Pick the topics you care about most. When a matching announcement is broadcast live,
+        it'll pop up above everything else — even if you're browsing a different tab.
+      </p>
+
+      <div class="topic-checkbox-grid" id="prefs-topics">
+        <label class="topic-checkbox"><input type="checkbox" value="academics"> 🎓 Academics</label>
+        <label class="topic-checkbox"><input type="checkbox" value="clubs"> 🤖 Clubs & Hackathons</label>
+        <label class="topic-checkbox"><input type="checkbox" value="admin"> 🏛️ Administration</label>
+        <label class="topic-checkbox"><input type="checkbox" value="hall"> 🏢 Hall & Residential</label>
+        <label class="topic-checkbox"><input type="checkbox" value="community"> 🤝 Community</label>
+      </div>
+
+      <div id="browser-notif-status" style="font-size: 0.78rem; color: var(--text-muted); margin: 0.75rem 0;"></div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+        <button type="button" id="cancel-notif-prefs-btn" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="save-notif-prefs-btn" class="btn btn-primary">Save Preferences</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  </div> <!-- /#app-shell -->
+
+  <!-- Client Application Script -->
+  <script src="app.js"></script>
+</body>
+</html>
