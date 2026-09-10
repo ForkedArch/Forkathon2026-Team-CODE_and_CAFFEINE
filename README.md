@@ -22,9 +22,8 @@
 | Md. Maksudur Rahman | 2K2507068 | CSE | [@maksudurr173](https://github.com/maksudurr173) |
 | Zawad Ibrahim | 2K2507081 | CSE | [@Zawad-2007](https://github.com/Zawad-2007) |
 | Maruf Rahman | 2K2507088 | CSE | [@maruf-codes33](https://github.com/maruf-codes33) |
-| Sheikh Rahatul Islam | 2K2507068 | CSE | [@RISami29](https://github.com/RISami29) |
+| Sheikh Rahatul Islam | 2K2507067 | CSE | [@RISami29](https://github.com/RISami29) |
 
-> ⚠️ **Note to team:** Two members share roll `2K2507068`. Double-check this before final submission — the rulebook (§47) requires all four members to be correctly listed, and an inaccurate roster can be treated as falsified team information (§30, §40).
 
 ---
 
