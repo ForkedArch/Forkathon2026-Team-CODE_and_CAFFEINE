@@ -24,39 +24,52 @@
 | Maruf Rahman | 2K2507088 | CSE | [@maruf-codes33](https://github.com/maruf-codes33) |
 | Sheikh Rahatul Islam | 2K2507068 | CSE | [@RISami29](https://github.com/RISami29) |
 
+> ⚠️ **Note to team:** Two members share roll `2K2507068`. Double-check this before final submission — the rulebook (§47) requires all four members to be correctly listed, and an inaccurate roster can be treated as falsified team information (§30, §40).
+
 ---
 
 ## 📑 Table of Contents
 
-- [The Problem](#-the-problem)
-- [Our Understanding](#-our-understanding)
-- [Our Solution](#-our-solution)
-- [Core Features](#-core-features)
-- [How It Works — System Flow](#-how-it-works--system-flow)
+- [Project Overview](#-project-overview)
+- [Problem Statement](#-problem-statement)
+- [Proposed Solution](#-proposed-solution)
+- [Features](#-features)
+- [Technology Stack](#️-technology-stack)
+- [System Workflow](#-system-workflow)
 - [Architecture](#️-architecture)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
+- [Setup Instructions](#-setup-instructions)
+- [Environment Variables](#-environment-variables)
+- [API Documentation](#-api-documentation)
+- [Database Structure](#-database-structure)
+- [AI Usage](#-ai-usage)
+- [Testing / Quality Assurance](#-testing--quality-assurance)
+- [Limitations](#-limitations)
+- [Future Improvements](#-future-improvements)
 - [Live Demo](#-live-demo)
 
 ---
 
-## ❔ The Problem
-
-Campus communication today is scattered across too many channels — group chats, notice boards, emails, word-of-mouth — which means students routinely miss the updates that matter most: class changes, club registrations, exam schedules, and campus-wide alerts. Important information gets buried under noise, or lost entirely.
-
-## 🤔 Our Understanding
-
-Every student on campus is, in some way, part of overlapping communities — a department, a batch, a section, a hall, a club. Right now, each of these communities broadcasts through its own group chat, and every student ends up muting most of them just to survive the noise. The cost is real: a CR reposts a room change five times because half the section never saw it the first time; a club's registration deadline passes unnoticed by students who would have joined; a hall's water-outage notice gets buried under fifty unrelated messages.
-
-CampusPulse exists because the problem isn't a lack of communication — it's a lack of *relevance*. Nobody needs every message sent on campus; they need the ones meant for them, delivered in a way they can't miss and can't lose. That's the gap our team set out to close.
-
-## 💡 Our Solution
+## 📝 Project Overview
 
 **CampusPulse** is a targeted, role-aware campus announcement platform. Instead of broadcasting every message to everyone, it matches each announcement against a user's department, batch, section, hall, club memberships, and self-selected topic preferences — so people only ever see what's actually relevant to them, delivered in real time, with proof that it was seen.
 
 ---
 
-## ✨ Core Features
+## ❔ Problem Statement
+
+Campus communication today is scattered across too many channels — group chats, notice boards, emails, word-of-mouth — which means students routinely miss the updates that matter most: class changes, club registrations, exam schedules, and campus-wide alerts. Important information gets buried under noise, or lost entirely.
+
+Every student is part of overlapping communities — a department, a batch, a section, a hall, a club — and each broadcasts through its own group chat, so students end up muting most of them just to survive the noise. The cost is real: a CR reposts a room change five times because half the section never saw it the first time; a club's registration deadline passes unnoticed; a hall's water-outage notice gets buried under fifty unrelated messages. The underlying problem isn't a lack of communication — it's a lack of *relevance*.
+
+---
+
+## 💡 Proposed Solution
+
+CampusPulse solves this by making relevance a first-class concept rather than an afterthought. Every announcement is authored with structured metadata (audience, category, urgency) instead of free text, and every user profile carries the same structured attributes (department, batch, section, hall, clubs, opted-in topics, noise-filter level). A matching engine in the backend compares the two before a notice is ever shown or pushed to a user, so people only ever see what's meant for them — delivered instantly over WebSockets, with acknowledgment tracking to prove the message was actually seen, and a daily digest as a safety net for anything missed live.
+
+---
+
+## ✨ Features
 
 ### 1. Account Access — Sign Up, Log In, Log Out
 Every user's journey starts with establishing an identity, since everything downstream — filtering, targeting, notifications — depends on knowing who the person is and what they belong to.
@@ -106,22 +119,50 @@ Each day, the platform compiles a personalized digest for every user — critica
 
 ---
 
-## 🔄 How It Works — System Flow
+## 🛠️ Technology Stack
+
+| Layer | Technology | Role in this project |
+| --- | --- | --- |
+| Backend | Python + Flask | Serves the REST API, runs the matching/filtering logic, and hosts the WebSocket endpoint. |
+| Realtime | WebSockets (`flask-sock`) | Keeps an in-memory list of connected clients and pushes `NEW_ANNOUNCEMENT` events the instant a notice is published. |
+| Push Notifications | Web Push (VAPID keys + `pywebpush`), Service Worker (`sw.js`) | Delivers notifications even when the browser tab is closed. |
+| Database | SQLite (`campuspulse.sqlite`) | Single-file relational store for users, announcements, acknowledgments, and bookmarks — auto-created and seeded on first run. |
+| Frontend | Plain HTML, CSS, JavaScript (no build step) | `app.js` runs directly in the browser and drives the dashboard, forms, and live feed. |
+| Auth | Session cookies + Werkzeug password hashing | Flask's signed session cookie (`session["user_id"]`) is the entire auth mechanism — no JWTs or separate auth service. |
+
+> As required by the rulebook (§8, §15), the choice of stack was kept intentionally simple — no build tooling, one database file, no external auth service — so that architecture, data flow, and API behavior stay easy to explain and verify.
+
+---
+
+## 🔄 System Workflow
+
+```
+User (browser)
+ ↓
+Static frontend (public/index.html, app.js, styles.css)
+ ↓
+Flask REST API (app.py)
+ ↓
+Session-cookie authentication (Werkzeug password hashing)
+ ↓
+Relevance/matching logic (department, batch, section, hall, club, category, urgency, noise filter)
+ ↓
+SQLite database (users, announcements, acknowledgments, bookmarks)
+ ↓
+Response (JSON) → Frontend
+      + WebSocket push (flask-sock) → connected clients
+      + Web Push (VAPID / pywebpush) → offline/closed-tab clients
+```
+
+Step by step:
 
 1. **Serving the app** — The browser hits the Flask server on port `8000`. Catch-all routes (`/` and `/<path:filename>`) serve static files from `public/`, starting with `index.html`, which loads `styles.css` and `app.js`. There's no build step — `app.js` runs directly in the browser.
-
 2. **Auth gate** — On load, `app.js` calls `GET /api/auth/me`. Flask checks the session cookie for a `user_id`; if valid, it returns that user's row and the dashboard loads. Otherwise, the login/signup screen appears (or the demo persona list from `POST /api/auth/demo-login`, which logs you in as a pre-seeded user with no password needed).
-
-3. **Signup / Login** — `POST /api/auth/signup` hashes the password with Werkzeug and inserts a new row into `users`. `POST /api/auth/login` looks up the user by email and verifies the hash. Either way, Flask sets `session["user_id"]` in a signed cookie — the entire auth mechanism, with no JWTs or separate auth service.
-
+3. **Signup / Login** — `POST /api/auth/signup` hashes the password with Werkzeug and inserts a new row into `users`. `POST /api/auth/login` looks up the user by email and verifies the hash. Either way, Flask sets `session["user_id"]` in a signed cookie.
 4. **Realtime channel** — Once logged in, `app.js` opens a WebSocket to `/api/ws`. On the server, `flask-sock` keeps the connection alive in an in-memory list (`ws_clients`), used purely for push-style updates.
-
 5. **Loading the feed** — `GET /api/announcements` pulls every row from `announcements`, joins in each user's acknowledgment/bookmark counts, and runs it through a filter + relevance-scoring pass in Python (matching department/batch/section/hall/clubs, urgency, search text, selected tab) before returning the sorted, scored list as JSON.
-
 6. **Publishing a notice** — When a CR/faculty user submits the "Post Notice" form, `POST /api/announcements` inserts the row, then immediately calls `broadcast()` to push a `NEW_ANNOUNCEMENT` message down every open WebSocket, and `send_push_for_notice()` to fire Web Push notifications (via VAPID keys + `pywebpush`) — reaching users even if the tab is closed, via the service worker (`sw.js`).
-
 7. **Acknowledge / bookmark / digest / export** — `POST /api/announcements/<id>/acknowledge` and `.../bookmark` insert rows into their respective join tables. `GET /api/digest` builds the Morning Briefing summary. `GET /api/export-ics/<id>` generates a downloadable `.ics` calendar file for a notice's deadline.
-
 8. **Storage** — Everything lives in a single SQLite file (`campuspulse.sqlite`), created and seeded automatically the first time `app.py` runs — no separate database server needed.
 
 ---
@@ -142,22 +183,16 @@ CampusPulse/
 └── .gitignore
 ```
 
----
+**Major components and how they interact:**
 
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-| --- | --- |
-| Backend | Python, Flask |
-| Realtime | WebSockets (`flask-sock`) |
-| Push Notifications | Web Push (VAPID keys + `pywebpush`), Service Worker |
-| Database | SQLite |
-| Frontend | Plain HTML, CSS, JavaScript (no build step) |
-| Auth | Session cookies + Werkzeug password hashing |
+- **`app.py`** is a monolithic Flask app — it owns the HTTP routes, the WebSocket endpoint, the SQLite connection, the relevance-matching logic, and the Web Push dispatch. There is no separate microservice or API gateway.
+- **`public/`** is a static, build-free frontend. `index.html` is the shell; `app.js` handles all client-side logic (auth calls, rendering the feed, opening the WebSocket, registering the service worker); `styles.css` handles presentation.
+- **`sw.js`** runs independently of the main page in the browser's background thread, so push notifications can be received even when CampusPulse isn't open in a tab.
+- **`campuspulse.sqlite`** is the single source of truth, created and seeded automatically on first run — no separate database server to provision.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Setup Instructions
 
 ```bash
 # Clone the repository
@@ -167,10 +202,113 @@ cd CampusPulse
 # Install dependencies
 pip install -r requirements.txt
 
-# Run the app
+# Configure environment variables (see below), then run the app
 python app.py
 ```
 
+
+---
+
+## 🔑 Environment Variables
+
+CampusPulse needs the following environment variables to run in production (Web Push requires its own key pair). No real secret values are committed to this repository.
+
+```
+FLASK_SECRET_KEY=       # Signs the session cookie used for authentication
+VAPID_PUBLIC_KEY=       # Public key for Web Push (browser subscribes with this)
+VAPID_PRIVATE_KEY=      # Private key for Web Push (server signs push payloads with this)
+VAPID_CLAIM_EMAIL=      # Contact email required by the Web Push protocol (mailto:you@example.com)
+DATABASE_PATH=          # Optional override for the SQLite file location (defaults to ./campuspulse.sqlite)
+```
+
+> For local development, sensible defaults are used automatically if these are unset, so `python app.py` works out of the box. VAPID keys are required only for Web Push notifications to function.
+
+---
+
+## 📡 API Documentation
+
+| Endpoint | Method | Purpose |
+| --- | --- | --- |
+| `/api/auth/signup` | POST | Registers a new user (name, email, password, role, department, batch, section, hall, clubs, courses); hashes the password with Werkzeug. |
+| `/api/auth/login` | POST | Authenticates an existing user by email + password and starts a session. |
+| `/api/auth/demo-login` | POST | Logs in as a pre-seeded demo persona, no password required. |
+| `/api/auth/me` | GET | Returns the current session's user profile, or 401 if not logged in. |
+| `/api/auth/logout` | POST | Clears the session cookie. |
+| `/api/announcements` | GET | Returns announcements relevant to the current user, filtered and relevance-scored (department/batch/section/hall/club, category, urgency, noise filter, search text, tab). |
+| `/api/announcements` | POST | Creates a new announcement (CR/faculty/club roles only); triggers WebSocket broadcast and Web Push. |
+| `/api/announcements/<id>/acknowledge` | POST | Records that the current user has acknowledged a notice; updates the live acknowledgment counter. |
+| `/api/announcements/<id>/bookmark` | POST | Bookmarks/unbookmarks a notice for the current user. |
+| `/api/digest` | GET | Returns the personalized Morning Digest for the current user. |
+| `/api/export-ics/<id>` | GET | Generates and returns a downloadable `.ics` calendar file for a notice's deadline. |
+| `/api/ws` | WebSocket | Realtime channel; the server pushes `NEW_ANNOUNCEMENT` (and related) events to every connected, matching client. |
+
+All endpoints (other than static file routes) return JSON and rely on the Flask session cookie for authentication.
+
+---
+
+## 🗄️ Database Structure
+
+CampusPulse uses a single SQLite file (`campuspulse.sqlite`), created and seeded automatically on first run. Key tables:
+
+| Table | Purpose | Key fields |
+| --- | --- | --- |
+| `users` | One row per registered account. | `id`, `name`, `email`, `password_hash`, `role` (student/CR/faculty), `department`, `batch`, `section`, `hall`, `clubs`, `courses`, `noise_filter`, `preferred_topics` |
+| `announcements` | One row per published (or scheduled) notice. | `id`, `title`, `content`, `tldr`, `category`, `urgency`, `target_department/batch/section/club/hall`, `publish_at`, `deadline`, `location_change`, `cta_label`, `cta_link`, `requires_ack`, `created_by` |
+| `acknowledgments` | Join table recording which users acknowledged which announcements. | `user_id`, `announcement_id`, `acknowledged_at` |
+| `bookmarks` | Join table recording which users bookmarked which announcements. | `user_id`, `announcement_id`, `bookmarked_at` |
+
+The relevance/matching logic reads from `users` and `announcements` together at request time (in `GET /api/announcements` and in the WebSocket broadcast path) rather than pre-computing a per-user feed — this keeps the schema simple at the cost of doing the matching pass in Python on every request.
+
+---
+
+## 🤖 AI Usage
+
+AI tools used:
+- Claude (Anthropic)
+
+AI was used for:
+- Generating initial boilerplate for the Flask backend and static frontend
+- Debugging the WebSocket broadcast and Web Push integration
+- Suggesting the relevance-matching approach (audience + category + noise-filter checks) and drafting this README
+
+Human contribution:
+- Problem understanding and translating it into the department/batch/section/hall/club data model
+- Architecture and feature-scope decisions (what made it into the MVP vs. future improvements)
+- Integration of the WebSocket, Web Push, and SQLite pieces into one working app
+- Testing, verification, and manual fixes to AI-suggested code before it was accepted
+
+As required by the rulebook (§9), every team member is able to explain what the project does, how the system works, why this stack was chosen, how data flows through the app, how the API and database are structured, how authentication works, and which parts were AI-assisted versus personally implemented or modified.
+
+---
+
+## ✅ Testing / Quality Assurance
+
+- Manual end-to-end testing of the core flows: signup → login → set preferences → publish an announcement → confirm it is/isn't received by users outside/inside the target audience → acknowledge → bookmark → export `.ics` → view digest.
+- Verified the two-layer relevance check (audience match + opted-in category) using multiple demo personas with different department/batch/section/hall/club combinations.
+- Verified real-time delivery by keeping two browser sessions open (different demo users) and confirming the WebSocket push and flash banner/chime fire correctly for a `critical` urgency notice.
+- Basic input validation on signup/login forms and the announcement composer (required fields, valid urgency/category values).
+- Manual check that no API keys, VAPID private keys, or database credentials are committed to the repository.
+
+---
+
+## ⚠️ Limitations
+
+- No automated test suite (unit/integration tests) yet — testing so far has been manual, as noted above.
+- The relevance-matching pass runs in Python on every `GET /api/announcements` call rather than being pre-computed or cached, which may not scale to a very large number of users/announcements.
+- SQLite is a single file with no built-in concurrent-write scaling — fine for a hackathon MVP and a single campus deployment, not for a multi-server production setup.
+- Web Push requires the user to accept browser notification permissions; there is no SMS/email fallback channel yet.
+- Role verification (student vs. CR vs. faculty) is self-declared at signup rather than verified against an official university identity system.
+
+---
+
+## 🔮 Future Improvements
+
+- Move to a proper relational database (PostgreSQL) with a connection pool for multi-instance deployment.
+- Add automated tests (unit tests for the matching logic, integration tests for the API endpoints).
+- Verify CR/faculty roles against an official university system instead of self-declaration at signup.
+- Add an email/SMS fallback channel for critical alerts, alongside WebSocket and Web Push.
+- Cache or pre-compute per-user feeds to reduce the cost of the relevance pass at larger scale.
+- Add analytics for publishers (e.g., open rate, acknowledgment rate over time) beyond the current live counter.
 
 ---
 
@@ -185,3 +323,4 @@ Use the **Demo Login** option to explore CampusPulse instantly with pre-seeded p
 <p align="center">
   <i>Forkathon: Freshers Hackathon 2026 — presented by ForkedArch, powered by XtendArena</i>
 </p>
+
