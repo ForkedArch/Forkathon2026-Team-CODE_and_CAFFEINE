@@ -15,7 +15,7 @@
 
 ---
 
-<b>Presentation on Youtube</b>
+## Presentation on Youtube
 
 [![Campus Pulse Presentation](https://youtube.com)](https://youtube.com/watch?v=GkeHwD8SYdU&si=NmrKDZ4PBjdVKzYz)
 
