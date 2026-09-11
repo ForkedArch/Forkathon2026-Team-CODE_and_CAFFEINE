@@ -15,7 +15,8 @@
 
 ---
 
-[![Campus Pulse Video](https://youtube.com)]([https://https://www.youtube.com/watch?v=O5l3aAwSwKM](https://www.youtube.com/watch?v=O5l3aAwSwKM))
+[![Campus Pulse Presentation](https://youtube.com)](https://youtube.com/watch?v=GkeHwD8SYdU&si=NmrKDZ4PBjdVKzYz)
+
 
 
 
