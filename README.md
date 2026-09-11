@@ -15,7 +15,7 @@
 
 ---
 
-[![Campus Pulse Video](https://youtube.com)](https://www.youtube.com/watch?v=O5l3aAwSwKM)
+
 
 
 ## 👥 Team — CODE_and_CAFFEINE
